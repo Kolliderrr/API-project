@@ -18,7 +18,7 @@ class BaseResource:
             response.raise_for_status()  # Поднимает исключение, если статус HTTP не успешен
             return response.json()
         except requests.RequestException as e:
-            print(f"Error during request: {e}")
+            logging.error(e, exc_info=True)
             return {}
 
 if __name__ == '__main__':
