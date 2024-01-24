@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 import logging
 import secrets
 
+
+logger = logging.getLogger()
+logger.addHandler(logging.FileHandler('inserver.log'))
+
 logging.basicConfig(filename='inserver.log', level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', filemode='a')
 
 app = FastAPI()
@@ -36,7 +40,7 @@ def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(se
     correct_username = secrets.compare_digest(credentials.username, client_username)
     correct_password = secrets.compare_digest(credentials.password, client_password)
     if not (correct_username and correct_password):
-        logging.error("Unauthorized access attempt: %s", credentials.username)
+        logger.error("Unauthorized access attempt: %s", credentials.username)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Ошибка авторизации! Введите правильные логин/пароль или обратитесь к администратору.",
@@ -54,6 +58,6 @@ async def return_data(item: Item, client_username: Annotated[str, Depends(get_cu
     try:
         return PriceList(prices=data)
     except ValidationError as e:
-        logging.error("Validation error: %s", str(e))
+        logger.error("Validation error: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Invalid response from BaseResource")
 
