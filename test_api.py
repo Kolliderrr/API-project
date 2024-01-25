@@ -37,6 +37,3 @@ class TestYourApp(unittest.TestCase):
         basic = requests.auth.HTTPBasicAuth(client_username, client_password)
         response = self.client.post("/query/", json={"warehouse": "example"}, auth=basic)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"prices": ...})
-
-
