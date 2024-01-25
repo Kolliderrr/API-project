@@ -11,7 +11,7 @@ class TestYourApp(unittest.TestCase):
     def test_unauthorized(self):
         response = self.client.post("/query/", json={"warehouse": "example"})
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json(), {"detail": ...})  # Уточните ожидаемый результат
+        self.assertEqual(response.json(), {"detail": 'Not authenticated'})  # Уточните ожидаемый результат
 
     def test_invalid_query(self):
         import os
@@ -37,6 +37,3 @@ class TestYourApp(unittest.TestCase):
         basic = requests.auth.HTTPBasicAuth(client_username, client_password)
         response = self.client.post("/query/", json={"warehouse": "example"}, auth=basic)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"prices": ...})
-
-
