@@ -4,7 +4,7 @@ from typing import Dict, Any
 import ujson
 import logging
 
-logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', filename='1Clog.log', filemode='w')
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', filename='1Clog.log', filemode='a')
 
 class BaseResource:
     def __init__(self, site: str, username: str, password: str):
