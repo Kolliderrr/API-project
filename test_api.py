@@ -23,7 +23,7 @@ class TestYourApp(unittest.TestCase):
         client_password = os.getenv('API_CLIENT_PASSWORD')
         basic = requests.auth.HTTPBasicAuth(client_username, client_password)
         response = self.client.post("/query/", json={}, auth=basic)
-        self.assertEqual(response.status_code, 500)  # Или другой код ошибки
+        self.assertEqual(response.status_code, 422)  # Или другой код ошибки
         # Дополнительные проверки для обработки ошибок
 
     def test_valid_query(self):

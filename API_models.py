@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 # Модель получаемого запроса - {'warehouse': Str | None)
 class Item(BaseModel):
-    warehouse: Union[str, None] = None
+    warehouse: Optional[str]
 
 # Модель возвращаемого запроса - {'warehouse': 'значение', 'prices': [...]} | {'prices': [...]}
 
