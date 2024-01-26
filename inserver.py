@@ -2,7 +2,7 @@
 Базовая версия API для работы с HTTP-интерфейсами. Данный пример написан для работы с бд 1С
 Логика работы с HTTP-интерфейсом бд вынесена в модуль main.
 '''
-
+from API_models import Item, PriceList, Order, OrderConfirmation
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -32,14 +32,7 @@ client_username = os.getenv('API_CLIENT_USERNAME')
 client_password = os.getenv('API_CLIENT_PASSWORD')
 
 security = HTTPBasic()
-# Модель получаемого запроса - {'warehouse': Str | None)
-class Item(BaseModel):
-    warehouse: Union[str, None]
 
-# Модель возвращаемого запроса - {'warehouse': 'значение', 'prices': [...]} | {'prices': [...]}
-class PriceList(BaseModel):
-    warehouse: Union[str, None]
-    prices: List[Dict[str, Any]]
 
 # Проверка логина\пароля
 def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
@@ -57,16 +50,27 @@ def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(se
 # Путь POST-запроса
 @app.post("/query/", response_model=PriceList)
 async def return_data(item: Item, client_username: Annotated[str, Depends(get_current_username)]):
-    resource = BaseResource(site, username, password)
-    data = resource.load_data(item.warehouse if item.warehouse else ' ')
+    resource = BaseResource(str(site + 'remains/products/'), username, password)
+    data = resource.load_data(item)
 
     # Валидация ответа
     try:
         if item.warehouse:
-            return PriceList(warehouse=item.warehouse, prices=data)
+            return PriceList(warehouse=item.warehouse, prices=data['prices'])
         else:
-            return PriceList(prices=data)
+            return PriceList(prices=data['prices'])
     except ValidationError as e:
         logger.error("Validation error: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Invalid response from BaseResource")
+
+@app.post("/order/", response_model=Order)
+async def create_order(order: Order, client_username: Annotated[str, Depends(get_current_username)]):
+    resource = BaseResource(str(site + 'selling/order/'), username, password)
+    data = resource.create_order(order)
+
+    try:
+        return OrderConfirmation(message=data['message'], order=data['order'])
+    except ValidationError as e_1:
+        logger.error('Validation error: %s', str(e_1))
+        raise HTTPException(status_code=500, detail=f'Invalid response from BaseResource')
 
