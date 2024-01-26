@@ -50,8 +50,8 @@ def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(se
 # Путь POST-запроса
 @app.post("/query/", response_model=PriceList)
 async def return_data(item: Item, client_username: Annotated[str, Depends(get_current_username)]):
-    resource = BaseResource(str(site + 'remains/products/'), username, password)
-    data = resource.load_data(item)
+    resource = BaseResource(site, username, password)
+    data = resource.load_data(item.warehouse if item.warehouse else ' ')
 
     # Валидация ответа
     try:
@@ -65,11 +65,11 @@ async def return_data(item: Item, client_username: Annotated[str, Depends(get_cu
 
 @app.post("/order/", response_model=Order)
 async def create_order(order: Order, client_username: Annotated[str, Depends(get_current_username)]):
-    resource = BaseResource(str(site + 'selling/order/'), username, password)
-    data = resource.create_order(order)
+    resource = BaseResource(site, username, password)
+    data = resource.create_order(dict(order))
 
     try:
-        return OrderConfirmation(message=data['message'], order=data['order'])
+        return OrderConfirmation(**data)
     except ValidationError as e_1:
         logger.error('Validation error: %s', str(e_1))
         raise HTTPException(status_code=500, detail=f'Invalid response from BaseResource')

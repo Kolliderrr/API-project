@@ -16,17 +16,16 @@ class BaseResource:
     def load_data(self, data: Item) -> Dict[str, Any]:
         try:
             json_data = data.model_dump_json()
-            response = requests.post(self.site, json=json_data, auth=self.basic)
+            response = requests.post(self.site + 'remains/products/', json=json_data, auth=self.basic)
             response.raise_for_status()  # Поднимает исключение, если статус HTTP не успешен
             return response.json()
         except requests.RequestException as e:
             logging.error(e, exc_info=True)
             return {}
 
-    def create_order(self, data: Order) -> Dict[str, Any]:
+    def create_order(self, data: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            json_data = dict(data)
-            response = requests.post(self.site, json=json_data, auth=self.basic)
+            response = requests.post(self.site + 'selling/order/', json=data, auth=self.basic)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e_order:
