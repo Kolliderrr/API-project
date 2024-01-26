@@ -58,7 +58,7 @@ async def return_data(item: Item, client_username: Annotated[str, Depends(get_cu
         if item.warehouse:
             return PriceList(warehouse=item.warehouse, prices=data)
         else:
-            return PriceList(prices=data)
+            return PriceList(warehouse='', prices=data)
     except ValidationError as e:
         logger.error("Validation error: %s", str(e))
         raise HTTPException(status_code=500, detail=f"Invalid response from BaseResource")
