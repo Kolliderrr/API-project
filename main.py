@@ -18,7 +18,10 @@ class BaseResource:
     def load_data(self, data: Item) -> Dict[str, Any]:
         try:
             json_data = data.model_dump_json()
-            response = requests.post(self.site + 'remains/products/', json=json_data, auth=self.basic)
+            if data.warehouse:
+                response = requests.post(self.site + 'remains/products/', json=json_data, auth=self.basic)
+            else:
+                response = requests.post(self.site + 'remains/products/', json=ujson.dumps({}), auth=self.basic)
             response.raise_for_status()  # Поднимает исключение, если статус HTTP не успешен
             return response.json()
         except requests.RequestException as e:

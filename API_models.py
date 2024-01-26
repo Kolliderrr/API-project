@@ -3,7 +3,7 @@
 
 """
 
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict, Any, Optional
 from pydantic import BaseModel
 
 # Модель получаемого запроса - {'warehouse': Str | None)
@@ -11,8 +11,9 @@ class Item(BaseModel):
     warehouse: Union[str, None] = None
 
 # Модель возвращаемого запроса - {'warehouse': 'значение', 'prices': [...]} | {'prices': [...]}
+
 class PriceList(BaseModel):
-    warehouse: Union[str, None]
+    warehouse: Optional[str]
     prices: List[Dict[str, Any]]
 
 
