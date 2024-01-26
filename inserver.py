@@ -51,7 +51,7 @@ def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(se
 @app.post("/query/", response_model=PriceList)
 async def return_data(item: Item, client_username: Annotated[str, Depends(get_current_username)]):
     resource = BaseResource(site, username, password)
-    data = resource.load_data(item)
+    data = resource.load_data(item if item.warehouse else ' ')
 
     # Валидация ответа
     try:

@@ -3,7 +3,7 @@ from requests.auth import HTTPBasicAuth
 from typing import Dict, Any
 import ujson
 import logging
-
+from typing import Union
 from API_models import Item, Order, Product
 
 
@@ -15,10 +15,10 @@ class BaseResource:
         self.site = site
         self.basic = HTTPBasicAuth(username, password)
 
-    def load_data(self, data: Item) -> Dict[str, Any]:
+    def load_data(self, data: Union[Item, str]) -> Dict[str, Any]:
         try:
-            json_data = data.model_dump_json()
-            if data.warehouse:
+            if not isinstance(data, str):
+                json_data = data.model_dump_json()
                 response = requests.post(self.site + 'remains/products/', json=json_data, auth=self.basic)
             else:
                 response = requests.post(self.site + 'remains/products/', json=ujson.dumps({}), auth=self.basic)
