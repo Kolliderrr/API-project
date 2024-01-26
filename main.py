@@ -4,7 +4,9 @@ from typing import Dict, Any
 import ujson
 import logging
 
-from API_models import Item, Order
+from API_models import Item, Order, Product
+
+
 
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', filename='1Clog.log', filemode='a')
 
@@ -23,9 +25,10 @@ class BaseResource:
             logging.error(e, exc_info=True)
             return {}
 
-    def create_order(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_order(self, data: Order) -> Dict[str, Any]:
         try:
-            response = requests.post(self.site + 'selling/order/', json=data, auth=self.basic)
+            dict_data = data.model_dump()
+            response = requests.post(self.site + 'selling/order/', json=dict_data, auth=self.basic)
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e_order:

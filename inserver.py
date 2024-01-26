@@ -51,7 +51,7 @@ def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(se
 @app.post("/query/", response_model=PriceList)
 async def return_data(item: Item, client_username: Annotated[str, Depends(get_current_username)]):
     resource = BaseResource(site, username, password)
-    data = resource.load_data(item.warehouse if item.warehouse else ' ')
+    data = resource.load_data(item)
 
     # Валидация ответа
     try:
@@ -67,7 +67,7 @@ async def return_data(item: Item, client_username: Annotated[str, Depends(get_cu
 @app.post("/order/", response_model=OrderConfirmation)
 async def create_order(order: Order, client_username: Annotated[str, Depends(get_current_username)]):
     resource = BaseResource(site, username, password)
-    data = resource.create_order(dict(order))
+    data = resource.create_order(order)
 
     try:
         return OrderConfirmation(**data)
