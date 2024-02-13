@@ -1,7 +1,7 @@
 import unittest
 from fastapi.testclient import TestClient
 from inserver import app  # Замените на фактический путь к вашему приложению
-import requests
+from unittest.mock import patch
 
 class TestYourApp(unittest.TestCase):
 
@@ -11,56 +11,26 @@ class TestYourApp(unittest.TestCase):
     def test_unauthorized(self):
         response = self.client.post("/query/", json={"warehouse": "example"})
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json(), {"detail": 'Not authenticated'})  # Уточните ожидаемый результат
+        self.assertEqual(response.json(), {"detail": 'Ошибка авторизации! Введите правильные логин/пароль или обратитесь к администратору.'})  # Уточните ожидаемый результат
 
-    def test_invalid_query(self):
-        import os
-        from dotenv import load_dotenv
-
-        load_dotenv()
-
-        client_username = os.getenv('API_CLIENT_USERNAME')
-        client_password = os.getenv('API_CLIENT_PASSWORD')
-        basic = requests.auth.HTTPBasicAuth(client_username, client_password)
-        response = self.client.post("/query/", json={}, auth=basic)
+    @patch('inserver.load_client_credentials', return_value={"username": "test_user", "password": "test_pass"})
+    def test_invalid_query(self, mock_load_client_credentials):
+        response = self.client.post("/query/", json={})
         self.assertEqual(response.status_code, 422)  # Или другой код ошибки
         # Дополнительные проверки для обработки ошибок
 
-    def test_valid_query(self):
-        import os
-        from dotenv import load_dotenv
-
-        load_dotenv()
-
-        client_username = os.getenv('API_CLIENT_USERNAME')
-        client_password = os.getenv('API_CLIENT_PASSWORD')
-        basic = requests.auth.HTTPBasicAuth(client_username, client_password)
-        response = self.client.post("/query/", json={"warehouse": "example"}, auth=basic)
+    @patch('inserver.load_client_credentials', return_value={"username": "test_user", "password": "test_pass"})
+    def test_valid_query(self, mock_load_client_credentials):
+        response = self.client.post("/query/", json={"warehouse": "example"})
         self.assertEqual(response.status_code, 200)
 
-
-    def test_invalid_order(self):
-        import os
-        from dotenv import load_dotenv
-
-        load_dotenv()
-
-        client_username = os.getenv('API_CLIENT_USERNAME')
-        client_password = os.getenv('API_CLIENT_PASSWORD')
-        basic = requests.auth.HTTPBasicAuth(client_username, client_password)
-        response = self.client.post("/order/", json={"warehouse": None}, auth=basic)
+    @patch('inserver.load_client_credentials', return_value={"username": "test_user", "password": "test_pass"})
+    def test_invalid_order(self, mock_load_client_credentials):
+        response = self.client.post("/order/", json={"warehouse": None})
         self.assertEqual(response.status_code, 422)
 
-
-    def test_valid_order(self):
-        import os
-        from dotenv import load_dotenv
-
-        load_dotenv()
-
-        client_username = os.getenv('API_CLIENT_USERNAME')
-        client_password = os.getenv('API_CLIENT_PASSWORD')
-        basic = requests.auth.HTTPBasicAuth(client_username, client_password)
+    @patch('inserver.load_client_credentials', return_value={"username": "test_user", "password": "test_pass"})
+    def test_valid_order(self, mock_load_client_credentials):
         response = self.client.post("/order/", json={
             'INN': '7721844807',
             'warehouse': 'Тюмень',
@@ -70,5 +40,5 @@ class TestYourApp(unittest.TestCase):
                     'manufacturer': 'STELLOX',
                     'quantity': 2
                 }]
-        }, auth=basic)
+        })
         self.assertEqual(response.status_code, 200)
