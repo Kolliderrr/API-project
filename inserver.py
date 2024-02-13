@@ -20,7 +20,7 @@ logger.addHandler(logging.FileHandler('inserver.log'))
 
 logging.basicConfig(filename='inserver.log', level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', filemode='a')
 
-app = FastAPI()
+app = FastAPI(docs_url="/documentation", redoc_url=None)
 # конфиденциальные данные хранятся в переменных среды
 load_dotenv()
 
