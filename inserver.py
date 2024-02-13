@@ -4,7 +4,7 @@
 '''
 from API_models import Item, PriceList, Order, OrderConfirmation
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Header
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing import Union, List, Dict, Any, Annotated
 from pydantic import BaseModel, ValidationError
@@ -13,6 +13,14 @@ import os
 from dotenv import load_dotenv
 import logging
 import secrets
+import json
+
+
+def load_client_credentials(client_name):
+    with open('clients_config.json') as f:
+        config = json.load(f)
+        return config.get(client_name, None)
+
 
 # Добавил отдельный логгер, но, честно говоря, не совсем пока понял как правильно создать второй экземпляр логгера
 logger = logging.getLogger()
@@ -35,9 +43,17 @@ security = HTTPBasic()
 
 
 # Проверка логина\пароля
-def get_current_username(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
-    correct_username = secrets.compare_digest(credentials.username, client_username)
-    correct_password = secrets.compare_digest(credentials.password, client_password)
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    client_credentials = load_client_credentials(credentials.username)
+    if client_credentials is None:
+        logger.error("Unauthorized access attempt: %s", credentials.username)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Ошибка авторизации! Введите правильные логин/пароль или обратитесь к администратору.",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    correct_username = secrets.compare_digest(credentials.username, client_credentials["username"])
+    correct_password = secrets.compare_digest(credentials.password, client_credentials["password"])
     if not (correct_username and correct_password):
         logger.error("Unauthorized access attempt: %s", credentials.username)
         raise HTTPException(
@@ -74,4 +90,5 @@ async def create_order(order: Order, client_username: Annotated[str, Depends(get
     except ValidationError as e_1:
         logger.error('Validation error: %s', str(e_1))
         raise HTTPException(status_code=500, detail=f'Invalid response from BaseResource')
+
 
